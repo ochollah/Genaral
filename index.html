@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>God's Generals Archive Platform</title>
+  
+  <!-- Quill Editor Styles & Scripts -->
+  <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+  <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
+  <!-- Cropper.js for Client-Side Avatar Cropping -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
+  <!-- Tailwind CSS & Premium Typography Google Fonts -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    body { font-family: 'Inter', sans-serif; background-color: #0b0d11; color: #e5e7eb; }
+    .serif-title { font-family: 'Cinzel', serif; }
+    
+    /* Custom Scrollbar for Luxury Dark Aesthetic */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0b0d11; }
+    ::-webkit-scrollbar-thumb { background: #272d37; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #d4af37; }
+
+    /* Custom Premium Circular Avatars */
+    .circular-avatar {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid rgba(214, 175, 55, 0.4);
+      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 15px 35px -5px rgba(0,0,0,0.8);
+    }
+    .group:hover .circular-avatar {
+      transform: scale(1.04);
+      border-color: #d4af37;
+      box-shadow: 0 0 25px rgba(214, 175, 55, 0.25), 0 20px 40px rgba(0,0,0,0.9);
+    }
+
+    /* Custom Page Break Visual Indicator inside Quill Admin Workspace */
+    .ql-editor .quill-page-break {
+      margin: 25px 0;
+      border: none;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #d4af37 50%, transparent);
+      position: relative;
+      text-align: center;
+    }
+    .ql-editor .quill-page-break::after {
+      content: "✦ PAGE BREAK ✦";
+      position: absolute;
+      top: -9px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #11141a;
+      padding: 0 14px;
+      font-size: 10px;
+      color: #d4af37;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+    }
+
+    /* Cropper Circular Mask Overlays */
+    .cropper-view-box, .cropper-face { border-radius: 50%; }
+
+    /* Luxury Interactive Book Page Spread System styling */
+    .book-spread-bg {
+      background: radial-gradient(circle at center, #fcfbfa 0%, #f4f0e6 100%);
+      box-shadow: inset 0 0 40px rgba(0,0,0,0.06), 0 30px 70px -10px rgba(0,0,0,0.7);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+  <!-- PLATFORM HEADER NAVIGATION BAR -->
+  <header class="border-b border-gray-900 bg-[#0f1217] px-8 py-4 flex justify-between items-center shadow-xl sticky top-0 z-40">
+    <div class="flex items-center space-x-4">
+      <div class="h-10 w-10 bg-gradient-to-br from-amber-400 to-amber-600 rounded-lg flex items-center justify-center text-black font-extrabold text-xl shadow-lg shadow-amber-500/10 tracking-tighter">Ω</div>
+      <div>
+        <h1 class="text-lg font-bold tracking-widest text-amber-500 serif-title leading-none">GOD'S GENERALS</h1>
+        <span class="text-[9px] uppercase tracking-widest text-gray-500 font-medium">Global Systematic Archive Platform</span>
+      </div>
+    </div>
+    <div class="flex items-center space-x-3">
+      <button onclick="toggleView('public')" id="nav-public" class="px-5 py-2 rounded-lg font-medium text-xs tracking-wider uppercase transition-all bg-amber-500 text-black font-semibold shadow-lg shadow-amber-500/10">Public Grid</button>
+      <button onclick="toggleView('admin-login')" id="nav-admin" class="px-5 py-2 rounded-lg font-medium text-xs tracking-wider uppercase border border-gray-800 hover:border-gray-700 text-gray-400 transition-all"></button>
+    </div>
+  </header>
+
+  <!-- CONTENT VIEWPORTS -->
+  <main class="flex-grow container mx-auto px-6 py-10 max-w-7xl">
+    
+    <!-- PUBLIC DASHBOARD GRID VIEW -->
+    <section id="view-public" class="space-y-10">
+      <div class="text-center max-w-xl mx-auto space-y-3">
+        <h2 class="text-3xl md:text-4xl font-normal tracking-wide text-gray-100 serif-title">The Mantle Archives</h2>
+        <div class="h-[1px] w-24 bg-amber-500/30 mx-auto"></div>
+        <p class="text-gray-400 text-xs leading-relaxed">Select a general's portrait below to open their comprehensive biographical layout, tracked signs, global impact, and original audiovisual registers.</p>
+      </div>
+
+      <div id="generals-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-10 pt-6 justify-items-center">
+        <!-- Dynamic Render UI target -->
+      </div>
+    </section>
+
+    <!-- ADMIN LOGIN GATE LAYER -->
+    <section id="view-admin-login" class="hidden max-w-md mx-auto my-16 bg-[#0f1217] border border-gray-900 rounded-2xl p-8 shadow-2xl relative overflow-hidden">
+      <div class="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-amber-500/40 to-transparent"></div>
+      <div class="text-center space-y-2 mb-8">
+        <h3 class="text-xl font-bold serif-title text-amber-500 tracking-wider">Secure Access Portal</h3>
+        <p class="text-[11px] text-gray-500 tracking-wide uppercase">Administrative Credentials Required</p>
+      </div>
+      <form id="loginForm" onsubmit="handleAdminLogin(event)" class="space-y-5">
+        <div>
+          <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Authorized Identity Email</label>
+          <input type="email" id="loginEmail" required value="admin@generalsarchive.org" class="w-full bg-[#14181f] border border-gray-800 rounded-lg px-4 py-2.5 text-xs text-gray-200 focus:outline-none focus:border-amber-500 transition-all">
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Administrative Cryptographic Key</label>
+          <input type="password" id="loginPassword" required value="securepass123" class="w-full bg-[#14181f] border border-gray-800 rounded-lg px-4 py-2.5 text-xs text-gray-200 focus:outline-none focus:border-amber-500 transition-all">
+        </div>
+        <button type="submit" class="w-full py-3 bg-amber-500 hover:bg-amber-600 text-black font-bold rounded-lg text-xs tracking-widest uppercase transition-all shadow-lg shadow-amber-500/10 mt-2">Authenticate Portal</button>
+      </form>
+    </section>
+
+    <!-- ADMIN CRITICAL MANAGEMENT BACKOFFICE -->
+    <section id="view-admin-dashboard" class="hidden space-y-8">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-gray-900 pb-5 gap-4">
+        <div>
+          <h2 class="text-2xl font-normal serif-title text-gray-100 tracking-wide">Registry Management Console</h2>
+          <p class="text-xs text-gray-500 mt-1">Perform structured system updates across global asset indices</p>
+        </div>
+        <div class="flex space-x-3">
+          <button onclick="openFormModal()" class="bg-amber-500 hover:bg-amber-600 text-black text-xs font-bold px-5 py-2.5 rounded-lg flex items-center space-x-2 transition-all shadow-md tracking-wider uppercase">
+            <span>+ Register General Asset</span>
+          </button>
+          <button onclick="handleAdminLogout()" class="bg-gray-900 border border-gray-800 hover:border-red-900/40 text-gray-400 hover:text-red-400 text-xs font-semibold px-4 py-2.5 rounded-lg transition-all">
+            Logout Session
+          </button>
+        </div>
+      </div>
+
+      <!-- Realtime Document Matrix Board Grid -->
+      <div class="bg-[#0f1217] border border-gray-900 rounded-xl overflow-hidden shadow-2xl">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-[#13171e] text-[10px] font-bold uppercase tracking-widest text-gray-400 border-b border-gray-900">
+                <th class="px-6 py-4">General / Affiliation</th>
+                <th class="px-6 py-4 hidden md:table-cell">Theological Impact Focus</th>
+                <th class="px-6 py-4 hidden sm:table-cell">Temporal Framework / Era</th>
+                <th class="px-6 py-4 text-right">System Interventions</th>
+              </tr>
+            </thead>
+            <tbody id="admin-table-body" class="divide-y divide-gray-900 text-xs text-gray-300">
+              <!-- Dynamically structured map entries go here -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- POPUP 1: LUXURY SPLIT-PAGE INTERACTIVE TIMELINE SPREAD -->
+    <div id="modal-book" class="hidden fixed inset-0 bg-black/95 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto">
+      <div class="relative w-full max-w-5xl bg-[#0f1217] border border-gray-900 rounded-2xl p-6 shadow-2xl my-auto space-y-5">
+        
+        <div class="flex justify-between items-center border-b border-gray-900 pb-3">
+          <div>
+            <h3 id="book-title" class="text-xl font-bold serif-title text-amber-500 tracking-wide">Historical Record</h3>
+            <p id="book-sub-ministry" class="text-[10px] text-gray-500 uppercase tracking-widest font-semibold mt-0.5"></p>
+          </div>
+          <button onclick="closeBookModal()" class="text-gray-400 hover:text-white bg-gray-900 border border-gray-800 hover:border-gray-700 rounded-full h-8 w-8 flex items-center justify-center transition-all text-sm">&times;</button>
+        </div>
+
+        <!-- System Parameters Ribbon Bar -->
+        <div id="book-meta-header" class="grid grid-cols-2 md:grid-cols-4 gap-4 bg-[#13171e] p-4 rounded-xl border border-gray-900 text-[11px] text-gray-400">
+          <!-- Handled dynamically on record load event -->
+        </div>
+
+        <!-- Interactive Core Page-Spread Engine Wrapper -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 book-spread-bg border border-amber-950/20 rounded-xl p-8 min-h-[500px] text-gray-900">
+          
+          <!-- LEFT SIDE PAGE SPREAD: Meta Manifest Indices -->
+          <div class="flex flex-col justify-between border-b md:border-b-0 md:border-r border-amber-900/10 pb-5 md:pb-0 md:pr-6 overflow-y-auto max-h-[520px]">
+            <div class="space-y-5">
+              <div class="text-center italic font-semibold text-amber-950 px-5 py-3 border-y border-amber-900/10 bg-amber-900/5 text-xs rounded-sm shadow-sm" id="book-punchline"></div>
+              
+              <!-- PUBLISHED SPIRITUAL QUOTES LAYER -->
+              <div id="book-quotes-section" class="space-y-2 hidden">
+                <h4 class="font-bold text-[10px] uppercase tracking-widest text-amber-900 serif-title">Spiritual Sayings & Mantles</h4>
+                <div id="book-quotes-stack" class="space-y-2">
+                  <!-- Quotes injected here -->
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 gap-4 text-xs">
+                <div class="space-y-1 bg-white/40 p-3 rounded border border-amber-900/5">
+                  <h4 class="font-bold text-[10px] uppercase tracking-widest text-amber-900 serif-title">Lineage & Family Framework</h4>
+                  <p id="book-family" class="text-gray-700 leading-relaxed"></p>
+                </div>
+                <div class="space-y-1 bg-white/40 p-3 rounded border border-amber-900/5">
+                  <h4 class="font-bold text-[10px] uppercase tracking-widest text-amber-900 serif-title">Signs, Wonders & Revelations</h4>
+                  <p id="book-miracles" class="text-gray-700 leading-relaxed"></p>
+                </div>
+                <div class="space-y-1 bg-white/40 p-3 rounded border border-amber-900/5">
+                  <h4 class="font-bold text-[10px] uppercase tracking-widest text-amber-900 serif-title">Theological System Focus</h4>
+                  <p id="book-theology" class="text-gray-700 leading-relaxed"></p>
+                </div>
+                <div class="space-y-1 bg-white/40 p-3 rounded border border-amber-900/5">
+                  <h4 class="font-bold text-[10px] uppercase tracking-widest text-amber-900 serif-title">Global Socio-Political Impact</h4>
+                  <p id="book-socioImpact" class="text-gray-700 leading-relaxed"></p>
+                </div>
+                <div class="space-y-1 bg-white/40 p-3 rounded border border-amber-900/5">
+                  <h4 class="font-bold text-[10px] uppercase tracking-widest text-amber-900 serif-title">Primary Written Works / Publications</h4>
+                  <p id="book-publications" class="text-gray-700 leading-relaxed"></p>
+                </div>
+              </div>
+
+              <!-- Media Feed Array Stream -->
+              <div id="book-media-section" class="space-y-3 pt-3 border-t border-amber-900/10">
+                <h4 class="font-bold text-[10px] uppercase tracking-widest text-amber-900 serif-title">Archived Video Sermons</h4>
+                <div id="book-video-stack" class="grid grid-cols-1 gap-3">
+                  <!-- Embed feeds go here -->
+                </div>
+              </div>
+            </div>
+            <div class="text-[9px] uppercase font-bold tracking-widest text-amber-900/50 mt-6 pt-2 border-t border-amber-900/5">System Register Volume Engine</div>
+          </div>
+
+          <!-- RIGHT SIDE PAGE SPREAD: Core Biography Narrative Engine -->
+          <div class="flex flex-col justify-between pt-5 md:pt-0 md:pl-6">
+            <div class="space-y-4">
+              <div class="flex justify-between items-center border-b border-amber-900/10 pb-2">
+                <h4 class="font-bold text-[10px] uppercase tracking-widest text-amber-900 serif-title">Chronological Chronicle</h4>
+                <span id="book-page-indicator" class="text-[9px] bg-amber-900/10 text-amber-950 px-2.5 py-1 rounded-full font-bold uppercase tracking-wider">Page 1</span>
+              </div>
+              <div id="book-biography-container" class="text-xs leading-relaxed text-gray-800 min-h-[340px] max-h-[440px] overflow-y-auto pr-2">
+                <!-- Content injected via page tokenizer -->
+              </div>
+            </div>
+            <div class="flex justify-between items-center mt-6 pt-3 border-t border-amber-900/10">
+              <button id="btn-prev-page" onclick="changePage(-1)" class="text-[10px] uppercase tracking-wider bg-amber-900/5 hover:bg-amber-900/10 text-amber-950 font-bold px-4 py-2 rounded transition-all disabled:opacity-20">&larr; Back</button>
+              <button id="btn-next-page" onclick="changePage(1)" class="text-[10px] uppercase tracking-wider bg-amber-950 hover:bg-amber-900 text-white font-bold px-4 py-2 rounded transition-all shadow-md disabled:opacity-20">Flip Page &rarr;</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Verifiable Document Link Citation Footer -->
+        <div class="text-xs text-gray-400 bg-gray-950 p-4 rounded-xl border border-gray-900 flex flex-col sm:flex-row sm:items-center gap-2">
+          <span class="font-bold text-amber-500 uppercase tracking-widest text-[9px] whitespace-nowrap">Verifiable Source Citations & References:</span>
+          <div id="book-references-links" class="flex flex-wrap gap-2 text-[11px]">
+            <!-- Reference nodes injected here -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- POPUP 2: COMPREHENSIVE RESTRUCTURED ADMINISTRATIVE CRUD FORM MODAL -->
+    <div id="modal-form" class="hidden fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+      <div class="w-full max-w-4xl bg-[#0f1217] border border-gray-900 rounded-2xl p-6 shadow-2xl my-auto">
+        <div class="flex justify-between items-center border-b border-gray-900 pb-4 mb-4">
+          <h3 id="form-modal-title" class="text-lg font-bold serif-title text-amber-500 tracking-wide">Register Profile Document</h3>
+          <button onclick="closeFormModal()" class="text-gray-400 hover:text-white bg-gray-900 border border-gray-800 hover:border-gray-700 rounded-full h-8 w-8 flex items-center justify-center transition-all text-sm">&times;</button>
+        </div>
+
+        <form id="generalForm" onsubmit="handleFormSubmit(event)" class="space-y-6 max-h-[73vh] overflow-y-auto pr-2">
+          <input type="hidden" id="edit-id">
+          
+          <!-- IMAGE UPLOADER & AVATAR CROP STAGE LINKED AS BASE64 -->
+          <div class="bg-[#13171e] border border-gray-900 rounded-xl p-4 flex flex-col md:flex-row items-center gap-6">
+            <div class="flex flex-col items-center space-y-2">
+              <div class="h-24 w-24 rounded-full border-2 border-amber-500/30 overflow-hidden bg-gray-950 flex items-center justify-center relative group">
+                <img id="form-avatar-preview" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=300" class="h-full w-full object-cover">
+              </div>
+              <span class="text-[10px] uppercase font-bold text-gray-500 tracking-wider">Avatar Matrix</span>
+            </div>
+            <div class="flex-grow w-full space-y-2">
+              <label class="block text-[10px] font-bold uppercase tracking-widest text-amber-500">Upload General Portrait Image Asset (Auto-Cropped to Circle Base64)</label>
+              <input type="file" id="imageFileInput" accept="image/*" onchange="processFileToCropper(event)" class="w-full text-xs text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-black hover:file:bg-amber-600 file:cursor-pointer bg-gray-950 border border-gray-800 rounded-lg p-2">
+              <input type="hidden" id="form-base64Image">
+            </div>
+          </div>
+
+          <!-- Form Grid Matrix Part 1 -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">General Legal/Title Name *</label>
+              <input type="text" id="form-titleName" required placeholder="e.g. Maria Woodworth-Etter" class="w-full bg-[#13171e] border border-gray-800 rounded-lg px-3 py-2 text-xs text-gray-200 focus:outline-none focus:border-amber-500">
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Primary Ministry / Church *</label>
+              <input type="text" id="form-churchOrMinistry" required placeholder="e.g. Signs and Wonders Campaigns" class="w-full bg-[#13171e] border border-gray-800 rounded-lg px-3 py-2 text-xs text-gray-200 focus:outline-none focus:border-amber-500">
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Motto / Core Calling Summary</label>
+              <input type="text" id="form-punchline" placeholder="e.g. Demonstrator of the Spirit and Holy Ghost Power" class="w-full bg-[#13171e] border border-gray-800 rounded-lg px-3 py-2 text-xs text-gray-200 focus:outline-none focus:border-amber-500">
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Geographic Birth Region</label>
+              <input type="text" id="form-placeOfBirth" placeholder="e.g. New Lisbon, Ohio, USA" class="w-full bg-[#13171e] border border-gray-800 rounded-lg px-3 py-2 text-xs text-gray-200 focus:outline-none focus:border-amber-500">
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Temporal Date of Departure</label>
+              <input type="date" id="form-dateOfDeath" class="w-full bg-[#13171e] border border-gray-800 rounded-lg px-3 py-2 text-xs text-gray-200 focus:outline-none focus:border-amber-500 text-gray-400">
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Documented Cause of Death</label>
+              <input type="text" id="form-causeOfDeath" placeholder="e.g. Natural Causes / Exhaustion" class="w-full bg-[#13171e] border border-gray-800 rounded-lg px-3 py-2 text-xs text-gray-200 focus:outline-none focus:border-amber-500">
+            </div>
+          </div>
+
+          <!-- Dynamic Link Registry Array Logic Block -->
+          <div class="bg-[#13171e] border border-gray-900 rounded-xl p-4 space-y-3">
+            <div class="flex justify-between items-center">
+              <label class="block text-[10px] font-bold uppercase tracking-widest text-amber-500">Archived Audiovisual Sermon Embed URLs Registry</label>
+              <button type="button" onclick="appendVideoInputLine()" class="text-[10px] bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 px-3 py-1 rounded font-bold uppercase transition-all">+ Append Row</button>
+            </div>
+            <div id="form-video-links-container" class="space-y-2">
+              <!-- Instanced dynamically inside input nodes -->
+            </div>
+          </div>
+
+          <!-- Expanded Profile Schema Data Blocks -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-gray-900">
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Lineage, Background, & Family Hierarchy Context</label>
+              <textarea id="form-family" rows="2" placeholder="Detail descendants, marriage, and ancestral legacy framework..." class="w-full bg-[#13171e] border border-gray-800 rounded-lg px-3 py-2 text-xs text-gray-200 focus:outline-none focus:border-amber-500"></textarea>
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Notable Documented Miracles & Revelatory Highlights</label>
+              <textarea id="form-miracles" rows="2" placeholder="List key supernatural occurrences or major corporate revivals..." class="w-full bg-[#13171e] border border-gray-800 rounded-lg px-3 py-2 text-xs text-gray-200 focus:outline-none focus:border-amber-500"></textarea>
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Theological Systematic Focus / Key Doctrines</label>
+              <textarea id="form-theology" rows="2" placeholder="e.g. Holiness, Divine Healing Covenant, Faith Dynamics..." class="w-full bg-[#13171e] border border-gray-800 rounded-lg px-3 py-2 text-xs text-gray-200 focus:outline-none focus:border-amber-500"></textarea>
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Global Socio-Political Impact Era Profile</label>
+              <textarea id="form-socioImpact" rows="2" placeholder="Describe cultural shifts, legislative influences, or historical societal reactions..." class="w-full bg-[#13171e] border border-gray-800 rounded-lg px-3 py-2 text-xs text-gray-200 focus:outline-none focus:border-amber-500"></textarea>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Primary Famous Written Works & Publications</label>
+              <input type="text" id="form-publications" placeholder="e.g. A Diary of Signs and Wonders, Acts of the Holy Ghost" class="w-full bg-[#13171e] border border-gray-800 rounded-lg px-3 py-2 text-xs text-gray-200 focus:outline-none focus:border-amber-500">
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Famous Spiritual Quotes (Pipe separated '|')</label>
+              <input type="text" id="form-quotes" placeholder="Quote one | Quote two" class="w-full bg-[#13171e] border border-gray-800 rounded-lg px-3 py-2 text-xs text-gray-200 focus:outline-none focus:border-amber-500">
+            </div>
+          </div>
+
+          <!-- Extended Hyperlinks Reference Stack Array -->
+          <div class="bg-[#13171e] border border-gray-900 rounded-xl p-4 space-y-3">
+            <div class="flex justify-between items-center">
+              <label class="block text-[10px] font-bold uppercase tracking-widest text-amber-500">Bibliographical Hyperlink Reference Index (Pipe-Separated Title|URL pairs)</label>
+            </div>
+            <input type="text" id="form-references" placeholder="Etter Biography Hub|https://example.com/etter | Liardon Library|https://archive.org" class="w-full bg-[#0f1217] border border-gray-800 rounded-lg px-3 py-2 text-xs text-gray-200 focus:outline-none focus:border-amber-500">
+          </div>
+
+          <!-- Advanced Extended Biography Text Workspace Editor -->
+          <div class="space-y-2">
+            <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400">Extended Chronological Biography Narrative Stack (Utilize customized workspace paging tool)</label>
+            <div id="editor-container" class="bg-[#13171e] border border-gray-800 rounded-xl text-gray-200 overflow-hidden" style="height: 240px;"></div>
+          </div>
+
+          <!-- Footer Control Actions -->
+          <div class="flex justify-end space-x-3 pt-4 border-t border-gray-900">
+            <button type="button" onclick="closeFormModal()" class="px-5 py-2.5 bg-gray-900 hover:bg-gray-800 border border-gray-800 text-gray-300 rounded-lg text-xs font-bold uppercase tracking-wider transition-all">Cancel</button>
+            <button type="submit" class="px-6 py-2.5 bg-amber-500 hover:bg-amber-600 text-black font-bold rounded-lg text-xs tracking-wider uppercase transition-all shadow-md">Commit Archive Record</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- POPUP 3: INLINE FILE CROPPER SUB-MODAL LAYER -->
+    <div id="modal-cropper-stage" class="hidden fixed inset-0 bg-black/95 z-[60] flex flex-col justify-between p-6">
+      <div class="text-center pb-2">
+        <h4 class="text-amber-500 font-bold serif-title text-base tracking-wide">Standardize Circular Crop Geometry</h4>
+        <p class="text-[11px] text-gray-400 mt-0.5">Adjust placement window framework to map facial avatar bounds correctly</p>
+      </div>
+      <div class="flex-grow max-h-[70vh] flex items-center justify-center overflow-hidden bg-gray-950 rounded-xl border border-gray-900 p-2">
+        <img id="cropper-target-image" class="max-w-full max-h-full block">
+      </div>
+      <div class="flex justify-center space-x-4 pt-4">
+        <button type="button" onclick="abortCropOperation()" class="px-6 py-2.5 bg-gray-900 text-gray-400 border border-gray-800 font-bold uppercase tracking-wider rounded-lg text-xs transition-all">Discard Image</button>
+        <button type="button" onclick="finalizeCropExtraction()" class="px-6 py-2.5 bg-amber-500 text-black font-bold uppercase tracking-wider rounded-lg text-xs transition-all shadow-lg">Lock & Crop Selection</button>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- PLATFORM CONTROL STATUS FOOTER -->
+  <footer class="border-t border-gray-900 bg-[#07080b] py-4 text-center text-[10px] text-gray-500 tracking-widest uppercase">
+    Infrastructure Node Matrix: <span id="db-status-badge" class="font-mono px-2.5 py-1 rounded text-[9px] bg-gray-900 text-gray-400 border border-gray-800 ml-1">Polling...</span>
+  </footer>
+
+  <!-- ======================== FIREBASE APPLICATION ARCHITECTURE NODES ======================== -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    
+    import { getFirestore as initFirestore, collection as col, doc as documentRef, addDoc as createDoc, updateDoc as alterDoc, deleteDoc as removeDoc, onSnapshot as listenToQuery, query as buildQuery, orderBy as sortOrder } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAofdfnFsgwOlvgU4oN_hTT68KbZ2OCBRE",
+      authDomain: "general-bcaaf.firebaseapp.com",
+      projectId: "general-bcaaf",
+      storageBucket: "general-bcaaf.firebasestorage.app",
+      messagingSenderId: "1017211625511",
+      appId: "1:1017211625511:web:0a807d123486199b24ae02",
+      measurementId: "G-WETPV8HKKZ"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = initFirestore(app);
+
+    let globalRecordsCache = [];
+    let cropperInstance = null;
+
+    // Helper to sanitize any YouTube URL variant into clean embed syntax
+    function sanitizeYouTubeUrl(url) {
+      if (!url) return '';
+      let videoId = '';
+      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+      const match = url.match(regExp);
+      if (match && match[2].length === 11) {
+        videoId = match[2];
+        return `https://www.youtube.com/embed/${videoId}`;
+      }
+      return url;
+    }
+
+    // ----------------------------------------------------
+    // INLINE FILE CROPPING & BASE64 STRING TRANSFORMATION LOGIC
+    // ----------------------------------------------------
+    window.processFileToCropper = function(event) {
+      const files = event.target.files;
+      if (!files || files.length === 0) return;
+      
+      const file = files[0];
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const targetImg = document.getElementById('cropper-target-image');
+        targetImg.src = e.target.result;
+        
+        document.getElementById('modal-cropper-stage').classList.remove('hidden');
+        
+        if (cropperInstance) cropperInstance.destroy();
+        
+        cropperInstance = new Cropper(targetImg, {
+          aspectRatio: 1,
+          viewMode: 1,
+          dragMode: 'move',
+          background: false,
+          autoCropArea: 0.8,
+          responsive: true
+        });
+      };
+      reader.readAsDataURL(file);
+    };
+
+    window.abortCropOperation = function() {
+      document.getElementById('imageFileInput').value = '';
+      document.getElementById('modal-cropper-stage').classList.add('hidden');
+      if (cropperInstance) cropperInstance.destroy();
+    };
+
+    window.finalizeCropExtraction = function() {
+      if (!cropperInstance) return;
+      
+      const canvas = cropperInstance.getCroppedCanvas({
+        width: 300,
+        height: 300,
+        imageSmoothingEnabled: true,
+        imageSmoothingQuality: 'high'
+      });
+      
+      const base64Data = canvas.toDataURL('image/jpeg', 0.85);
+      
+      document.getElementById('form-base64Image').value = base64Data;
+      document.getElementById('form-avatar-preview').src = base64Data;
+      
+      document.getElementById('modal-cropper-stage').classList.add('hidden');
+      cropperInstance.destroy();
+    };
+
+    // ----------------------------------------------------
+    // DYNAMIC LINK REGISTRY INTERFACE MANAGEMENT MUTATIONS
+    // ----------------------------------------------------
+    window.appendVideoInputLine = function(value = '') {
+      const container = document.getElementById('form-video-links-container');
+      const rowId = 'vid-row-' + Date.now() + '-' + Math.floor(Math.random() * 100);
+      const rowHtml = `
+        <div id="${rowId}" class="flex items-center space-x-2 video-input-row">
+          <input type="url" value="${value}" placeholder="https://www.youtube.com/watch?v=... or embed URL" class="flex-grow bg-[#0f1217] border border-gray-800 rounded-lg px-3 py-1.5 text-xs text-gray-200 focus:outline-none focus:border-amber-500">
+          <button type="button" onclick="document.getElementById('${rowId}').remove()" class="text-xs bg-red-950 hover:bg-red-900 text-red-400 px-3 py-1.5 rounded-lg border border-red-900/20 font-semibold transition-all">&times;</button>
+        </div>
+      `;
+      container.insertAdjacentHTML('beforeend', rowHtml);
+    };
+
+    function readVideoLinksFromForm() {
+      const inputs = document.querySelectorAll('.video-input-row input');
+      const links = [];
+      inputs.forEach(input => {
+        if(input.value.trim().length > 0) {
+          links.push(sanitizeYouTubeUrl(input.value.trim()));
+        }
+      });
+      return links;
+    }
+
+    // ----------------------------------------------------
+    // ADVANCED EXTENDED QUILL INTERFACE REGISTRY
+    // ----------------------------------------------------
+    const EmbedBlot = Quill.import('blots/block/embed');
+    class PageBreakBlot extends EmbedBlot {
+      static create() {
+        let node = super.create();
+        node.setAttribute('class', 'quill-page-break');
+        return node;
+      }
+    }
+    PageBreakBlot.blotName = 'pagebreak';
+    PageBreakBlot.tagName = 'hr';
+    Quill.register(PageBreakBlot);
+
+    let quillInstance;
+    document.addEventListener('DOMContentLoaded', () => {
+      quillInstance = new Quill('#editor-container', {
+        theme: 'snow',
+        modules: {
+          toolbar: {
+            container: [
+              [{ 'header': [1, 2, false] }],
+              ['bold', 'italic', 'underline', 'blockquote'],
+              ['pagebreak']
+            ],
+            handlers: {
+              'pagebreak': function() {
+                const range = this.quill.getSelection();
+                if (range) {
+                  this.quill.insertEmbed(range.index, 'pagebreak', true);
+                  this.quill.setSelection(range.index + 1);
+                }
+              }
+            }
+          }
+        }
+      });
+      
+      const pbButton = document.querySelector('.ql-pagebreak');
+      if (pbButton) {
+        pbButton.innerHTML = '⚡ APPEND PAGE SPLIT';
+        pbButton.className = 'ql-pagebreak px-2 text-[10px] font-bold text-amber-500 bg-amber-500/10 rounded cursor-pointer transition-all hover:bg-amber-500/20';
+        pbButton.style.width = 'auto';
+        pbButton.style.height = '24px';
+      }
+    });
+
+    // ----------------------------------------------------
+    // REALTIME SNAPSHOT DATABASE STREAMING CHANNELS
+    // ----------------------------------------------------
+    const q = buildQuery(col(db, "generals"), sortOrder("titleName", "asc"));
+    
+    listenToQuery(q, (snapshot) => {
+      globalRecordsCache = [];
+      snapshot.forEach((doc) => {
+        globalRecordsCache.push({ id: doc.id, ...doc.data() });
+      });
+
+      renderPublicGrid();
+      renderAdminTable();
+
+      const badge = document.getElementById('db-status-badge');
+      badge.className = "font-mono px-2.5 py-1 rounded text-[9px] uppercase font-bold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 ml-1";
+      badge.innerText = "Firestore Cloud Synchronized";
+    }, (error) => {
+      console.error("Pipeline failure: ", error);
+      const badge = document.getElementById('db-status-badge');
+      badge.className = "font-mono px-2.5 py-1 rounded text-[9px] uppercase font-bold bg-red-500/10 text-red-500 border border-red-500/20 ml-1";
+      badge.innerText = "Pipeline Interrupted";
+    });
+
+    // ----------------------------------------------------
+    // AUTH ROUTING CONTROL STATE MACHINE LAYER
+    // ----------------------------------------------------
+    let userSessionState = null;
+
+    onAuthStateChanged(auth, (user) => {
+      const navAdmin = document.getElementById('nav-admin');
+      if (user) {
+        userSessionState = user;
+        navAdmin.innerText = "Admin Console";
+        if(window.activeView === 'admin-login') toggleView('admin-dashboard');
+      } else {
+        userSessionState = null;
+        navAdmin.innerText = "Secure Portal";
+        if(window.activeView === 'admin-dashboard') toggleView('public');
+      }
+    });
+
+    window.handleAdminLogin = async function(e) {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value;
+      const pass = document.getElementById('loginPassword').value;
+      try {
+        await signInWithEmailAndPassword(auth, email, pass);
+        toggleView('admin-dashboard');
+      } catch (err) {
+        alert("Authorization Denied: " + err.message);
+      }
+    };
+
+    window.handleAdminLogout = async function() {
+      if(confirm("Terminate session and encrypt local management channels?")) {
+        await signOut(auth);
+        toggleView('public');
+      }
+    };
+
+    window.activeView = 'public';
+    window.toggleView = function(targetView) {
+      window.activeView = targetView;
+      document.getElementById('view-public').classList.add('hidden');
+      document.getElementById('view-admin-login').classList.add('hidden');
+      document.getElementById('view-admin-dashboard').classList.add('hidden');
+      
+      document.getElementById('nav-public').className = "px-5 py-2 rounded-lg font-medium text-xs tracking-wider uppercase border border-gray-800 text-gray-400 hover:border-gray-700 transition-all";
+      document.getElementById('nav-admin').className = "px-5 py-2 rounded-lg font-medium text-xs tracking-wider uppercase border border-gray-800 text-gray-400 hover:border-gray-700 transition-all";
+
+      if(targetView === 'public') {
+        document.getElementById('view-public').classList.remove('hidden');
+        document.getElementById('nav-public').className = "px-5 py-2 rounded-lg font-medium text-xs tracking-wider uppercase transition-all bg-amber-500 text-black font-semibold shadow-lg shadow-amber-500/10";
+      } else if (targetView === 'admin-login' && !userSessionState) {
+        document.getElementById('view-admin-login').classList.remove('hidden');
+        document.getElementById('nav-admin').className = "px-5 py-2 rounded-lg font-medium text-xs tracking-wider uppercase transition-all bg-amber-500 text-black font-semibold shadow-lg shadow-amber-500/10";
+      } else {
+        if(!userSessionState) {
+          document.getElementById('view-admin-login').classList.remove('hidden');
+          document.getElementById('nav-admin').className = "px-5 py-2 rounded-lg font-medium text-xs tracking-wider uppercase transition-all bg-amber-500 text-black font-semibold shadow-lg shadow-amber-500/10";
+          window.activeView = 'admin-login';
+        } else {
+          document.getElementById('view-admin-dashboard').classList.remove('hidden');
+          document.getElementById('nav-admin').className = "px-5 py-2 rounded-lg font-medium text-xs tracking-wider uppercase transition-all bg-amber-500 text-black font-semibold shadow-lg shadow-amber-500/10";
+        }
+      }
+    };
+
+    // ----------------------------------------------------
+    // COMPONENT RENDERING ARCHITECTURES
+    // ----------------------------------------------------
+    function renderPublicGrid() {
+      const targetGrid = document.getElementById('generals-grid');
+      const fallbackImg = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=300";
+      targetGrid.innerHTML = globalRecordsCache.map(item => `
+        <div class="flex flex-col items-center space-y-4 cursor-pointer group text-center" onclick="openBookModal('${item.id}')">
+          <div class="relative">
+            <img src="${item.base64Image || fallbackImg}" alt="${item.titleName}" class="circular-avatar">
+            <div class="absolute inset-0 rounded-full border border-amber-500/0 group-hover:border-amber-500/30 transition-all scale-105 duration-500"></div>
+          </div>
+          <div>
+            <h4 class="font-bold text-gray-200 group-hover:text-amber-400 transition-colors duration-300 serif-title text-xs tracking-widest uppercase">${item.titleName}</h4>
+            <p class="text-[10px] tracking-wider font-mono text-gray-500 mt-1 uppercase truncate max-w-[160px]">${item.churchOrMinistry}</p>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderAdminTable() {
+      const targetTable = document.getElementById('admin-table-body');
+      if(globalRecordsCache.length === 0) {
+        targetTable.innerHTML = `<tr><td colspan="4" class="text-center py-10 text-gray-500 text-xs tracking-wider uppercase font-mono">No documents present inside active cloud matrix.</td></tr>`;
+        return;
+      }
+      targetTable.innerHTML = globalRecordsCache.map(item => `
+        <tr class="hover:bg-gray-900/20 transition-colors border-b border-gray-900">
+          <td class="px-6 py-4 flex items-center space-x-3">
+            <img src="${item.base64Image || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=300'}" class="w-9 h-9 rounded-full object-cover border border-gray-800">
+            <div>
+              <span class="font-bold text-gray-200 block text-xs tracking-wide">${item.titleName}</span>
+              <span class="text-[10px] text-gray-500 font-mono uppercase block">${item.churchOrMinistry}</span>
+            </div>
+          </td>
+          <td class="px-6 py-4 text-xs text-gray-400 hidden md:table-cell max-w-xs truncate font-mono">${item.theology ? item.theology.substring(0, 45) + '...' : 'N/A'}</td>
+          <td class="px-6 py-4 text-xs text-gray-400 hidden sm:table-cell">
+            <div class="font-semibold text-gray-300 text-[11px]">${item.placeOfBirth || 'Unspecified'}</div>
+            <div class="text-[10px] text-amber-500/70 font-mono mt-0.5">† ${item.dateOfDeath || 'Active / Unknown'}</div>
+          </td>
+          <td class="px-6 py-4 text-right space-x-2 whitespace-nowrap">
+            <button onclick="openFormModal('${item.id}')" class="text-amber-400 hover:text-amber-300 bg-amber-500/5 hover:bg-amber-500/10 border border-amber-500/10 px-3 py-1.5 rounded-md text-[11px] font-semibold transition-all">Edit</button>
+            <button onclick="handleDeleteRecord('${item.id}')" class="text-red-400 hover:text-red-300 bg-red-500/5 hover:bg-red-500/10 border border-red-500/10 px-3 py-1.5 rounded-md text-[11px] font-semibold transition-all">Wipe</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // ----------------------------------------------------
+    // SPLIT PAGE REGISTRY FLIP LOGIC ENGINE
+    // ----------------------------------------------------
+    let activeBookPages = [];
+    let currentActivePageIndex = 0;
+
+    window.openBookModal = function(id) {
+      const item = globalRecordsCache.find(r => r.id === id);
+      if(!item) return;
+
+      document.getElementById('book-title').innerText = item.titleName;
+      document.getElementById('book-sub-ministry').innerText = item.churchOrMinistry;
+      document.getElementById('book-punchline').innerText = `"${item.punchline || 'No core motto statement registered.'}"`;
+      document.getElementById('book-family').innerText = item.family || 'No tracked linear framework.';
+      document.getElementById('book-miracles').innerText = item.miracles || 'No specific supernatural events logged.';
+      document.getElementById('book-theology').innerText = item.theology || 'No doctrine parameters registered.';
+      document.getElementById('book-socioImpact').innerText = item.socioImpact || 'No structural impact parameters tracked.';
+      document.getElementById('book-publications').innerText = item.publications || 'Oral Teachings Only';
+
+      document.getElementById('book-meta-header').innerHTML = `
+        <div><span class="text-amber-500/60 block uppercase font-mono tracking-widest text-[9px] mb-0.5">Geographic Region</span>${item.placeOfBirth || 'Unspecified'}</div>
+        <div><span class="text-amber-500/60 block uppercase font-mono tracking-widest text-[9px] mb-0.5">Temporal Departure</span>${item.dateOfDeath || 'Unknown / Alive'}</div>
+        <div><span class="text-amber-500/60 block uppercase font-mono tracking-widest text-[9px] mb-0.5">Cause Vector</span>${item.causeOfDeath || 'Unrecorded'}</div>
+        <div><span class="text-amber-500/60 block uppercase font-mono tracking-widest text-[9px] mb-0.5">Media Assets</span>${item.videoUrls ? item.videoUrls.length : 0} Records Attached</div>
+      `;
+
+      // RENDERING PIPED QUOTES MATRIX IN THE UI SPREAD
+      const quotesSection = document.getElementById('book-quotes-section');
+      const quotesStack = document.getElementById('book-quotes-stack');
+      quotesStack.innerHTML = '';
+      if(item.quotes && item.quotes.trim().length > 0) {
+        quotesSection.classList.remove('hidden');
+        const quotesArray = item.quotes.split('|');
+        quotesArray.forEach(q => {
+          if(q.trim().length > 0) {
+            quotesStack.insertAdjacentHTML('beforeend', `
+              <div class="border-l-2 border-amber-600/40 pl-3 py-1 my-1 italic text-amber-950/90 text-[11px] bg-amber-900/[0.02] rounded-r">
+                "${q.trim()}"
+              </div>
+            `);
+          }
+        });
+      } else {
+        quotesSection.classList.add('hidden');
+      }
+
+      // Render Dynamic Hyperlink Reference Strings Matrix
+      const refBox = document.getElementById('book-references-links');
+      refBox.innerHTML = '';
+      if(item.references && item.references.trim().length > 0) {
+        const pairs = item.references.split('|');
+        pairs.forEach(p => {
+          const parts = p.split(';');
+          if(parts.length >= 2) {
+            refBox.insertAdjacentHTML('beforeend', `<a href="${parts[1].trim()}" target="_blank" class="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded hover:bg-amber-500/20 transition-all font-medium inline-block">${parts[0].trim()} ↗</a>`);
+          } else {
+            refBox.insertAdjacentHTML('beforeend', `<span class="bg-gray-900 text-gray-400 px-2 py-0.5 rounded border border-gray-800 inline-block">${p.trim()}</span>`);
+          }
+        });
+      } else {
+        refBox.innerHTML = '<span class="text-gray-600 italic">No external verification URLs bound.</span>';
+      }
+
+      // Render Dynamic Media Row Lists
+      const videoStack = document.getElementById('book-video-stack');
+      videoStack.innerHTML = '';
+      if (item.videoUrls && item.videoUrls.length > 0) {
+        document.getElementById('book-media-section').classList.remove('hidden');
+        item.videoUrls.forEach(url => {
+          videoStack.insertAdjacentHTML('beforeend', `
+            <div class="relative w-full aspect-video rounded-xl overflow-hidden border border-amber-900/10 shadow-sm bg-black">
+              <iframe src="${url}" class="absolute inset-0 w-full h-full" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            </div>
+          `);
+        });
+      } else {
+        document.getElementById('book-media-section').classList.add('hidden');
+      }
+
+      const rawHtml = item.biography || '<p>No written documentation.</p>';
+      const delimiterRegex = /<hr[^>]*class=["']quill-page-break["'][^>]*>/i;
+      activeBookPages = rawHtml.split(delimiterRegex).filter(p => p.trim().length > 0);
+      
+      if(activeBookPages.length === 0) activeBookPages.push("<p>No narrative text exists.</p>");
+      
+      currentActivePageIndex = 0;
+      renderBookPageContents();
+
+      document.getElementById('modal-book').classList.remove('hidden');
+    };
+
+    function renderBookPageContents() {
+      const container = document.getElementById('book-biography-container');
+      container.innerHTML = activeBookPages[currentActivePageIndex];
+      
+      document.getElementById('book-page-indicator').innerText = `Page ${currentActivePageIndex + 1} of ${activeBookPages.length}`;
+      document.getElementById('btn-prev-page').disabled = (currentActivePageIndex === 0);
+      document.getElementById('btn-next-page').disabled = (currentActivePageIndex === activeBookPages.length - 1);
+    }
+
+    window.changePage = function(direction) {
+      currentActivePageIndex += direction;
+      renderBookPageContents();
+    };
+
+    window.closeBookModal = function() {
+      document.getElementById('modal-book').classList.add('hidden');
+    };
+
+    // ----------------------------------------------------
+    // ADMIN MUTATION & TRANSACTION VALIDATION ENGINES
+    // ----------------------------------------------------
+    window.openFormModal = function(id = null) {
+      const form = document.getElementById('generalForm');
+      form.reset();
+      quillInstance.setContents([]);
+      document.getElementById('edit-id').value = '';
+      document.getElementById('form-base64Image').value = '';
+      document.getElementById('imageFileInput').value = '';
+      document.getElementById('form-avatar-preview').src = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=300";
+      document.getElementById('form-video-links-container').innerHTML = '';
+      
+      if(id) {
+        document.getElementById('form-modal-title').innerText = "Modify Operational Profile Document";
+        const record = globalRecordsCache.find(r => r.id === id);
+        if(record) {
+          document.getElementById('edit-id').value = record.id;
+          document.getElementById('form-titleName').value = record.titleName;
+          document.getElementById('form-churchOrMinistry').value = record.churchOrMinistry;
+          document.getElementById('form-placeOfBirth').value = record.placeOfBirth || '';
+          document.getElementById('form-punchline').value = record.punchline || '';
+          document.getElementById('form-dateOfDeath').value = record.dateOfDeath || '';
+          document.getElementById('form-causeOfDeath').value = record.causeOfDeath || '';
+          document.getElementById('form-family').value = record.family || '';
+          document.getElementById('form-miracles').value = record.miracles || '';
+          document.getElementById('form-theology').value = record.theology || '';
+          document.getElementById('form-socioImpact').value = record.socioImpact || '';
+          document.getElementById('form-publications').value = record.publications || '';
+          document.getElementById('form-quotes').value = record.quotes || '';
+          document.getElementById('form-references').value = record.references || '';
+          
+          if(record.base64Image) {
+            document.getElementById('form-base64Image').value = record.base64Image;
+            document.getElementById('form-avatar-preview').src = record.base64Image;
+          }
+          
+          if(record.videoUrls && record.videoUrls.length > 0) {
+            record.videoUrls.forEach(url => appendVideoInputLine(url));
+          } else {
+            appendVideoInputLine();
+          }
+          
+          quillInstance.root.innerHTML = record.biography || '';
+        }
+      } else {
+        document.getElementById('form-modal-title').innerText = "Register New General Profile Document";
+        appendVideoInputLine();
+      }
+      document.getElementById('modal-form').classList.remove('hidden');
+    };
+
+    window.closeFormModal = function() {
+      document.getElementById('modal-form').classList.add('hidden');
+    };
+
+    window.handleFormSubmit = async function(e) {
+      e.preventDefault();
+      if(!userSessionState) return alert("Security Lock: Invalid administrative session state.");
+
+      const editId = document.getElementById('edit-id').value;
+      const linksArray = readVideoLinksFromForm();
+      
+      const payload = {
+        titleName: document.getElementById('form-titleName').value,
+        churchOrMinistry: document.getElementById('form-churchOrMinistry').value,
+        placeOfBirth: document.getElementById('form-placeOfBirth').value,
+        punchline: document.getElementById('form-punchline').value,
+        dateOfDeath: document.getElementById('form-dateOfDeath').value,
+        causeOfDeath: document.getElementById('form-causeOfDeath').value,
+        base64Image: document.getElementById('form-base64Image').value || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=300',
+        videoUrls: linksArray,
+        family: document.getElementById('form-family').value,
+        miracles: document.getElementById('form-miracles').value,
+        theology: document.getElementById('form-theology').value,
+        socioImpact: document.getElementById('form-socioImpact').value,
+        publications: document.getElementById('form-publications').value,
+        quotes: document.getElementById('form-quotes').value,
+        references: document.getElementById('form-references').value,
+        biography: quillInstance.root.innerHTML
+      };
+
+      try {
+        if(editId) {
+          const docRef = documentRef(db, "generals", editId);
+          await alterDoc(docRef, payload);
+        } else {
+          await createDoc(col(db, "generals"), payload);
+        }
+        closeFormModal();
+      } catch (err) {
+        alert("Database write error caught: " + err.message);
+      }
+    };
+
+    window.handleDeleteRecord = async function(id) {
+      if(!userSessionState) return alert("Action Refused: Unauthorized clearance context.");
+      if(confirm("Confirm destructive execution wipe? This document cannot be retrieved from the cloud layer.")) {
+        try {
+          await removeDoc(documentRef(db, "generals", id));
+        } catch (err) {
+          alert("Database exception during drop procedure: " + err.message);
+        }
+      }
+    };
+  </script>
+</body>
+</html>
